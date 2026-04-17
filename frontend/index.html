@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Three-Tier Web Application</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b1020;
+        --panel: #11182b;
+        --line: rgba(255, 255, 255, 0.08);
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+        --accent: #22d3ee;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: radial-gradient(circle at top, #13203f 0%, var(--bg) 52%);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+      .card {
+        background: rgba(17, 24, 43, 0.9);
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      }
+      .eyebrow {
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 12px;
+      }
+      h1 {
+        margin: 10px 0 8px;
+        font-size: clamp(2rem, 5vw, 4rem);
+      }
+      p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+      .grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        margin-top: 24px;
+      }
+      .pill {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 10px 14px;
+        color: #d1d5db;
+        background: rgba(255, 255, 255, 0.03);
+      }
+      button {
+        margin-top: 24px;
+        border: 0;
+        border-radius: 999px;
+        padding: 14px 18px;
+        background: linear-gradient(135deg, #22d3ee, #60a5fa);
+        color: #04111b;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .status {
+        margin-top: 18px;
+        font-size: 14px;
+        color: #cbd5e1;
+      }
+      .footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <div class="eyebrow">Three-Tier App</div>
+        <h1>Frontend, API, and Database in one simple demo.</h1>
+        <p>
+          This page talks to the backend API, and the backend records visits in PostgreSQL.
+          It is intentionally small so the three-tier flow stays easy to understand.
+        </p>
+        <div class="grid">
+          <div class="pill">Frontend: Nginx + HTML</div>
+          <div class="pill">API: Flask</div>
+          <div class="pill">Data: PostgreSQL</div>
+        </div>
+        <button id="visitBtn" type="button">Register Visit</button>
+        <div id="status" class="status">Loading status...</div>
+        <div class="footer">Use the button to add a visit record and see the count change.</div>
+      </div>
+    </div>
+    <script>
+      const statusEl = document.getElementById("status");
+      const visitBtn = document.getElementById("visitBtn");
+
+      async function loadStatus() {
+        const response = await fetch("/api/status");
+        const data = await response.json();
+        statusEl.textContent = `API: ${data.app} | Database: ${data.database} | Visits: ${data.visits}`;
+      }
+
+      visitBtn.addEventListener("click", async () => {
+        await fetch("/api/visit", { method: "POST" });
+        await loadStatus();
+      });
+
+      loadStatus().catch(() => {
+        statusEl.textContent = "Backend not reachable yet.";
+      });
+    </script>
+  </body>
+</html>

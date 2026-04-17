@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: three-tier
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: devopsghazali/three-tier-web-application-backend:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: appdb
+            - name: POSTGRES_USER
+              value: appuser
+            - name: POSTGRES_PASSWORD
+              value: appsecret
