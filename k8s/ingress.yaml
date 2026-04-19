@@ -5,8 +5,7 @@ metadata:
   namespace: three-tier
 spec:
   rules:
-    - host: three-tier.local
-      http:
+     - http:
         paths:
           - path: /
             pathType: Prefix
