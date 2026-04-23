@@ -15,7 +15,7 @@ Upstream app context (from the repo README):
 ### 1) Install
 ```bash
 # from the repo root
-cd solution
+cd solution 
 export NAMESPACE=three-tier
 export RELEASE=three-tier
 helm upgrade --install "$RELEASE" ./charts/three-tier-webapp \
