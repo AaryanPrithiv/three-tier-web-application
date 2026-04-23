@@ -1,0 +1,19 @@
+{{- if .Values.postgres.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "threeTier.fullname" . }}-postgres-init
+  labels:
+    {{- include "threeTier.labels" . | nindent 4 }}
+data:
+  init.sql: |
+    -- Minimal schema initialization.
+    -- NOTE: Official postgres image runs scripts in /docker-entrypoint-initdb.d only on FIRST initialization of the data directory.
+    CREATE TABLE IF NOT EXISTS visits (
+      id SERIAL PRIMARY KEY,
+      count INTEGER NOT NULL DEFAULT 0
+    );
+    INSERT INTO visits (count)
+    SELECT 0
+    WHERE NOT EXISTS (SELECT 1 FROM visits);
+{{- end }}

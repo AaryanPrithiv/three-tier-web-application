@@ -1,0 +1,81 @@
+{{- if and .Values.postgres.enabled .Values.backup.enabled }}
+{{- if .Values.backup.pvc.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "threeTier.fullname" . }}-pgbackups
+  labels:
+    {{- include "threeTier.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.backup.pvc.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.backup.pvc.size }}
+  {{- if .Values.backup.pvc.storageClassName }}
+  storageClassName: {{ .Values.backup.pvc.storageClassName }}
+  {{- end }}
+---
+{{- end }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "threeTier.fullname" . }}-pgdump
+  labels:
+    {{- include "threeTier.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "threeTier.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: pgbackup
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ include "threeTier.fullname" . }}-ops
+          containers:
+            - name: pgdump
+              image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+              imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "threeTier.dbSecretName" . }}
+                      key: POSTGRES_PASSWORD
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "threeTier.dbSecretName" . }}
+                      key: POSTGRES_USER
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "threeTier.dbSecretName" . }}
+                      key: POSTGRES_DB
+              command:
+                - sh
+                - -c
+                - |
+                  set -euo pipefail
+                  TS=$(date -u +%Y%m%dT%H%M%SZ)
+                  OUT=/backups/${PGDATABASE}-${TS}.sql
+                  echo "[pgdump] writing ${OUT}"
+                  pg_dump -h postgres -U "$PGUSER" "$PGDATABASE" > "$OUT"
+                  ls -1t /backups/*.sql | tail -n +{{ add1 .Values.backup.retention }} | xargs -r rm -f
+                  echo "[pgdump] done"
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+              resources:
+                {{- toYaml .Values.backup.resources | nindent 16 }}
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: {{ include "threeTier.fullname" . }}-pgbackups
+{{- end }}

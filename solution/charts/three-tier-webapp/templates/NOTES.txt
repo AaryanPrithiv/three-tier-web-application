@@ -1,0 +1,13 @@
+1) Access the application
+
+- If you enabled Ingress, configure your local /etc/hosts or DNS to point the hostname to your ingress controller.
+- Or port-forward the frontend service:
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "threeTier.fullname" . }}-frontend 8080:{{ .Values.frontend.service.port }}
+
+Then open: http://localhost:8080
+
+2) Backend health endpoint
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "threeTier.fullname" . }}-backend 5000:{{ .Values.backend.service.port }}
+  curl -sS http://localhost:5000/api/healthz

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: three-tier-webapp
+description: Production-minded Helm chart for a three-tier web application (frontend nginx, backend flask, postgres)
+type: application
+version: 0.1.0
+appVersion: "1.0"
