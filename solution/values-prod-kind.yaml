@@ -1,0 +1,15 @@
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: localhost
+      paths:
+        - path: /
+          pathType: Prefix
+
+frontend:
+  image:
+    repository: nginx
+    tag: stable
+
+

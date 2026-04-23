@@ -18,7 +18,18 @@ Upstream app context (from the repo README):
 cd solution
 export NAMESPACE=three-tier
 export RELEASE=three-tier
-helm upgrade --install "$RELEASE" ./charts/three-tier-webapp   -n "$NAMESPACE" --create-namespace   -f ./charts/three-tier-webapp/values-dev.yaml
+helm upgrade --install "$RELEASE" ./charts/three-tier-webapp \
+  -n "$NAMESPACE" \
+  --create-namespace \
+  -f ./charts/three-tier-webapp/values-prod.yaml \
+  -f ./values-prod-kind.yaml
+
+
+# Note
+The default container image configured in the chart is not accessible from the registry, or not available, resulting in imagePullBackOff
+
+For local validation, the frontend image was overridden to a public image. The backend image remains unavailable, expected readiness failures
+
 # wait for workloads
 kubectl -n "$NAMESPACE" rollout status deploy/${RELEASE}-frontend
 kubectl -n "$NAMESPACE" rollout status deploy/${RELEASE}-backend
@@ -30,6 +41,9 @@ Option A (ingress):
 kubectl -n "$NAMESPACE" get ingress
 ```
 If you use an ingress controller, map the hostname (default `three-tier.local`) to the ingress IP.
+
+Here I have used here  Ingress-nginx contoller was validated locally using kind cluster
+
 Option B (port-forward):
 ```bash
 kubectl -n "$NAMESPACE" port-forward svc/${RELEASE}-frontend 8080:80
