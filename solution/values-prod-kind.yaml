@@ -9,7 +9,11 @@ ingress:
 
 frontend:
   image:
-    repository: nginx
-    tag: stable
+    repository: aaryan8/three-tier-frontend
+    tag: v1
 
+backend:
+  image:
+    repository: aaryan8/three-tier-backend
+    tag: v1
 

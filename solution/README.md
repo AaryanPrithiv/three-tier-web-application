@@ -26,9 +26,31 @@ helm upgrade --install "$RELEASE" ./charts/three-tier-webapp \
 
 
 # Note
-The default container image configured in the chart is not accessible from the registry, or not available, resulting in imagePullBackOff
+Build the docker file locally and pushed it in my registry
 
-For local validation, the frontend image was overridden to a public image. The backend image remains unavailable, expected readiness failures
+Because default container image configured in the chart is not accessible from the registry, or not available, resulting in imagePullBackOff
+
+# Trouble shoot commands
+docker build -t aaryan8/three-tier-backend:v1 ./backend
+docker push aaryan8/three-tier-backend:v1
+
+docker build -t aaryan8/three-tier-frontend:v1 ./frontend
+docker push aaryan8/three-tier-frontend:v1
+
+
+helm -n "$NAMESPACE" uninstall "$RELEASE"
+kubectl delete ns "$NAMESPACE" --wait=false
+
+
+kind load docker-image aaryan8/three-tier-frontend:v1 --name three-tier
+kubectl rollout restart deployment three-tier-frontend -n three-tier
+
+
+kubectl logs -f -l app.kubernetes.io/component=frontend -n three-tier
+kubectl rollout restart deployment three-tier-backend -n three-tier
+
+kubectl logs -f -l app.kubernetes.io/component=frontend -n three-tier
+kubectl logs -f -l app.kubernetes.io/component=backend -n three-tier
 
 # wait for workloads
 kubectl -n "$NAMESPACE" rollout status deploy/${RELEASE}-frontend
