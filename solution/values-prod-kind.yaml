@@ -2,7 +2,7 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    - host: localhost
+    - host: three-tier.local
       paths:
         - path: /
           pathType: Prefix

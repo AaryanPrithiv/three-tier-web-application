@@ -65,8 +65,17 @@ kubectl -n "$NAMESPACE" get ingress
 If you use an ingress controller, map the hostname (default `three-tier.local`) to the ingress IP.
 
 Here I have used here  Ingress-nginx contoller was validated locally using kind cluster
-kubectl port-forward service/ingress-nginx-controller -n ingress-nginx 8080:80
 
+
+# To allow three-tier app connect and expose on browser
+Map the host under system32/drivers/etc/hosts
+127.0.0.1 three-tier.local 
+
+kubectl port-forward service/ingress-nginx-controller -n ingress-nginx 9090:80
+http://three-tier.local:9090
+
+kubectl port-forward service/ingress-nginx-controller -n ingress-nginx 8080:80
+#change the hosts under solution/values.prod-kind.yaml to localhost 
 Frontend (UI): http://localhost:8080/
 Backend (API): http://localhost:8080/api/healthz
 
