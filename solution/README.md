@@ -68,6 +68,11 @@ Here I have used here  Ingress-nginx contoller was validated locally using kind 
 
 
 # To allow three-tier app connect and expose on browser
+This is managed via Helm templates using the release name
+
+  location /api/ {
+    proxy_pass http://three-tier-backend:5000/api/;  (changed) 
+
 Map the host under system32/drivers/etc/hosts
 127.0.0.1 three-tier.local 
 
