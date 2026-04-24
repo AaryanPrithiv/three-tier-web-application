@@ -65,6 +65,10 @@ kubectl -n "$NAMESPACE" get ingress
 If you use an ingress controller, map the hostname (default `three-tier.local`) to the ingress IP.
 
 Here I have used here  Ingress-nginx contoller was validated locally using kind cluster
+kubectl port-forward service/ingress-nginx-controller -n ingress-nginx 8080:80
+
+Frontend (UI): http://localhost:8080/
+Backend (API): http://localhost:8080/api/healthz
 
 Option B (port-forward):
 ```bash
